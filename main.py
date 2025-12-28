@@ -26,8 +26,7 @@ SIMILARITY_THRESHOLD = 0.9
 JINGLE_COUNTER_OFFSET = 0
 AD_WINDOW_START_MINUTE = 52
 AD_WINDOW_END_MINUTE = 10
-DETECTION_ADJUST_DELAY_DOWN = 1
-DETECTION_ADJUST_DELAY_UP = 10
+DETECTION_ADJUST_DELAY = 5
 
 VOLUME_ADS = 0
 VOLUME_DEFAULT = 2
@@ -164,7 +163,7 @@ with Status("Initializing") as status:
                     status.console.log(f"Reference audio detected at {dt.now().strftime("%H:%M:%S")}")
                     if jingle_counter == 0:
                         status.console.log("Ads starting")
-                        wait_for_key_with_timeout(DETECTION_ADJUST_DELAY_DOWN, "Ads starting, adjusting in %s seconds", status)
+                        wait_for_key_with_timeout(DETECTION_ADJUST_DELAY, "Ads starting, adjusting in %s seconds", status)
                         asyncio.run(set_volume(VOLUME_ADS, airplay_configs, status))
                         sleep(1)
                         asyncio.run(set_volume(VOLUME_ADS, airplay_configs, status))
@@ -178,7 +177,7 @@ with Status("Initializing") as status:
                         cooldown = 60
                     elif jingle_counter == 2:
                         status.console.log("Ads ending")
-                        wait_for_key_with_timeout(DETECTION_ADJUST_DELAY_UP, "Ads ending, adjusting in %s seconds", status)
+                        wait_for_key_with_timeout(DETECTION_ADJUST_DELAY, "Ads ending, adjusting in %s seconds", status)
                         asyncio.run(set_volume(VOLUME_DEFAULT/2, airplay_configs, status))
                         sleep(1)
                         asyncio.run(set_volume(VOLUME_DEFAULT, airplay_configs, status))
