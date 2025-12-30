@@ -21,11 +21,11 @@ STREAM_URL = "https://icecast.omroep.nl/radio2-bb-mp3"
 REFERENCE_START_FILES = ["audio/jingle_start.wav", "audio/jingle_start_2.wav"]
 REFERENCE_END_FILES = ["audio/jingle_end.wav", "audio/jingle_end_2.wav"]
 SAMPLING_RATE = 16000
-SIMILARITY_THRESHOLD = 0.9
+SIMILARITY_THRESHOLD = 0.92
 
 JINGLE_COUNTER_OFFSET = 0
 AD_WINDOW_START_MINUTE = 52
-AD_WINDOW_END_MINUTE = 10
+AD_WINDOW_END_MINUTE = 8
 DETECTION_ADJUST_DELAY = 5
 
 VOLUME_ADS = 0
@@ -37,7 +37,7 @@ AIRPLAY_TARGETS = {
     "Living Room HomePod R": 100.0,
 }
 
-HELP_STR = "Actions: [D] Default volume  [L] Lowest volume  [M] Mute  [0-9] Set volume"
+HELP_STR = "Actions: [D] Default volume  [L] Lowest volume  [M] Mute  [S] Skip timer  [0-9] Set volume"
 
 
 def get_file_mfcc(file_path: str, target_sr: int = SAMPLING_RATE, n_mfcc: int = 13) -> np.ndarray:
@@ -124,6 +124,9 @@ def wait_for_key_with_timeout(sleep_time: int, sleep_msg: str, status: Status, t
                 elif ch == "l":
                     status.console.log("Keypress: L -> setting lowest audible volume")
                     asyncio.run(set_volume(0.01, airplay_configs, status))
+                elif ch == "s":
+                    status.console.log("Keypress: S -> skipping wait")
+                    return
                 elif ch in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
                     status.console.log(f"Keypress: {ch} -> setting volume")
                     asyncio.run(set_volume(int(ch), airplay_configs, status))
@@ -169,7 +172,7 @@ with Status("Initializing") as status:
                         asyncio.run(set_volume(VOLUME_ADS, airplay_configs, status))
                         jingle_counter += 1
                         state_msg = "Ads running, detected 1/3 jingles"
-                        cooldown = 60 * (60 - dt.now().minute) + 60
+                        cooldown = min(60 * (60 - dt.now().minute) + 60, 500)
                     elif jingle_counter == 1:
                         jingle_counter += 1
                         state_msg = "Ads running, detected 2/3 jingles"
